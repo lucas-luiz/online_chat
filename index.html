@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!--     <link rel='stylesheet' type="text/css" href="./index.css">-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat {
+            width: 15rem;
+
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            row-gap: 1rem;
+
+            padding: 1rem;
+            border: 1px solid lightgray;
+        }
+
+        .chat__messages {
+            border: 1px solid lightgray;
+
+            height: 20rem;
+            width: 100%;
+
+            display: flex;
+            flex-direction: column;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="chat">
+        <h3>CHAT</h3>
+        <div class="chat__messages" id="chat__messages">
+
+        </div>
+        <div>
+            <input class="chat__input" id="chat__input" type="text">
+            <input id="chat__submit" type="submit" value="send">
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let messages = document.querySelector('#chat__messages')
+        let input = document.querySelector('#chat__input')
+        let submit = document.querySelector('#chat__submit')
+
+        let xhr = new XMLHttpRequest
+        xhr.open('GET', 'http://localhost:3000/messages', true)
+        xhr.setRequestHeader('Content-type', 'application/json');
+        xhr.onload = () => {
+            console.log(JSON.parse(xhr.response))
+            JSON.parse(xhr.response).messages.forEach((msg) => {
+
+                messages.innerHTML += `<span>${msg}</span>`
+            })
+        }
+        xhr.send()
+
+
+        const handleSubmit = () => {
+            const data = { message: input.value }
+            let xhr = new XMLHttpRequest
+            xhr.open('POST', 'http://localhost:3000', true)
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.send(JSON.stringify(data))
+            console.log(JSON.stringify(data))
+            socket.emit('message', data.message)
+            input.value = ''
+        }
+
+        socket.on('message', (data) => {
+
+            messages.innerHTML += `<span>${data}</span>`
+        })
+
+        submit.addEventListener('click', (e) => {
+            e.preventDefault()
+            handleSubmit()
+        })
+
+        document.addEventListener('keyup', (e) => {
+            e.preventDefault()
+            if (e.code == 'Enter') {
+                handleSubmit()
+            }
+        })
+    </script>
+</body>
+<!-- <script src="client.js"></script> -->
+
+
+</html>
