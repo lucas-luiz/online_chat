@@ -11,9 +11,8 @@ const io = new Server(server)
 const port = 3000
 
 db = {
-    messages: ["that's the chat"]
+    messages: [{ id: "system", content: "that's the chat" }]
 }
-
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -36,8 +35,12 @@ io.on('connection', (socket) => {
 
 
 app.post('/', (req, res) => {
-    console.log('EXPRESS: ' + req.body.message)
-    db.messages.push(req.body.message)
+    console.log('EXPRESS: ' + req.body)
+    db.messages.push(req.body)
     res.send(req.body.message)
+})
+
+app.listen(() => {
+    console.log("server open on: " + port)
 })
 
